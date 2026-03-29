@@ -1,31 +1,62 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-# Secret Detection customization: https://docs.gitlab.com/user/application_security/secret_detection/pipeline/configure
-# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
-# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
-stages:
-- build
-- test
-- deploy
-- review
-- dast
-- staging
-- canary
-- production
-- incremental rollout 10%
-- incremental rollout 25%
-- incremental rollout 50%
-- incremental rollout 100%
-- performance
-- cleanup
-- secret-detection
-sast:
-  stage: test
-include:
-- template: Auto-DevOps.gitlab-ci.yml
-variables:
-  SECRET_DETECTION_ENABLED: 'true'
-secret_detection:
-  stage: secret-detection
+terraform:
+  stage: deploy
+  when: manual
+  tags:
+    - docker
+  image:
+    name: hashicorp/terraform:1.14.8
+    entrypoint: [""]
+  
+  variables:
+    TF_ROOT: ${CI_PROJECT_DIR}/terraform
+    TF_STATE_NAME: default
+    TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}
+
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - ${TF_ROOT}/.terraform
+  
+  before_script:
+    - cd ${TF_ROOT}
+    - terraform init
+       
+  script:
+    - echo "Running validate"
+    - terraform validate
+
+    - echo "Running plan"
+    - terraform plan -out=tfplan
+
+    - echo "Applying plan"
+    - terraform apply "tfplan"
+  artifacts:
+    paths:
+      - ${TF_ROOT}/tfplan
+  only:
+    refs:
+      - main
+    changes:
+      - "**/*.tf"
+
+flyway-migrate:
+  stage: deploy
+  when: manual
+  tags:
+    - docker
+  image:
+    name: redgate/flyway:latest
+    entrypoint: [""]
+  variables:
+    FLYWAY_URL: "jdbc:sqlserver://${DB_HOST}:${DB_PORT};databaseName=${DB_NAME};encrypt=true;trustServerCertificate=true"
+    FLYWAY_USER: "${DB_USER}"
+    FLYWAY_PASSWORD: "${DB_PASSWORD}"
+    FLYWAY_LOCATIONS: "filesystem:sql/migrations, filesystem:sql/programmability, filesystem:sql/data"
+  script:
+    - flyway info
+    - flyway migrate
+  only:
+    refs:
+      - main
+    changes:
+      - sql/**/*
