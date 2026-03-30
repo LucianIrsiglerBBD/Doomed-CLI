@@ -1,0 +1,177 @@
+@startuml Create a lobby sequence diagram
+title Lobby Creation Flow
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Player
+participant "DoomedCLI" as CLI
+participant "API Server" as API
+database "PostgreSQL" as DB
+
+Player -> CLI : Create lobby
+activate CLI
+
+CLI -> API : POST /lobby
+activate API
+
+note right of DB
+	Lobby information contains a game code, which is 
+    used to allow other players to join the lobby.
+end note
+
+API -> API : validate token
+
+alt token is valid
+API -> DB : create lobby
+activate DB
+DB --> API : lobby record
+deactivate DB
+API --> CLI : HTTP 200 + lobby record
+else token is invalid
+API --> CLI : HTTP 401 Unauthorized
+end
+
+deactivate API
+
+note over Player
+	No further action.
+end note
+deactivate CLI
+
+@enduml
+@startuml Join a lobby sequence diagram
+title Lobby Joining Flow
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Player
+participant "DoomedCLI" as CLI
+participant "API Server" as API
+database "PostgreSQL" as DB
+
+Player -> CLI : Join lobby
+activate CLI
+
+CLI -> API : POST /lobby/join with game code
+activate API
+
+API -> API : validate token
+
+alt token is invalid
+API --> CLI : HTTP 401 Unauthorized
+else token is valid
+API -> API : check lobby exists
+
+alt lobby exists
+API -> DB : join lobby
+activate DB
+DB --> API : join lobby response
+deactivate DB
+API --> CLI : HTTP 200 + join lobby response
+else lobby does not exist
+API --> CLI : HTTP 404 Not Found
+end
+end
+
+deactivate API
+note over Player
+	No further action.
+end note
+deactivate CLI
+
+@enduml
+
+@startuml Authentication sequence diagram
+title Authentication Flow
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Player
+participant "DoomedCLI" as CLI
+participant "API Server" as API
+participant "Google OAuth" as GOOGLE
+database "PostgreSQL" as DB
+
+Player -> CLI : login command
+activate CLI
+
+CLI -> API : POST /oauth2/authorization/google
+activate API
+
+API -> GOOGLE : redirect to Google OAuth
+alt user authenticates successfully
+GOOGLE --> API : Google OAuth response into callback URL
+API --> API : generate UUID token
+API --> DB : Store token with email
+activate DB
+DB --> API : token stored
+deactivate DB
+API --> CLI : HTTP 200 + UUID generated token
+CLI --> CLI : store token in .token file for future use
+
+else user does not authenticate successfully
+GOOGLE -> API : Google OAuth error response
+API --> CLI : HTTP 401 Unauthorized
+end
+
+deactivate API
+note over Player
+	No further action.
+end note
+deactivate CLI
+
+@enduml
+
+@startuml Authorization sequence diagram
+title Authorization Flow for commands
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Player
+participant "DoomedCLI" as CLI
+participant "API Server" as API
+
+activate CLI
+Player -> CLI : command
+CLI -> CLI : Read .token file for auth token
+
+alt .token file exists
+CLI -> CLI : Attach token to API request as Bearer token in Authorization header
+CLI -> API : API request with token
+activate API
+API -> API : validate token
+alt token is valid
+API --> API : execute command
+API --> CLI : HTTP 200 OK
+else token is invalid
+API --> CLI : HTTP 401 Unauthorized
+end
+deactivate API
+else .token file does not exist
+CLI -> API : API request without token
+activate API
+API -> API : validate token
+
+note right API
+	Some endpoints may not require authentication, 
+    thus this will not fail.
+end note
+
+API --> CLI : HTTP 401 Unauthorized
+deactivate API
+end
+deactivate CLI
+
+note over Player
+	No further action.
+end note
+
+@enduml
