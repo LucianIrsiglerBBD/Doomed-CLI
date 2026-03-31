@@ -1,4 +1,4 @@
-﻿using Spectre.Console;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 var app = new CommandApp();
@@ -32,3 +32,4 @@ while (true)
         AnsiConsole.MarkupLine($"[red]Error: {ex.Message}[/]");
     }
 }
+ 
