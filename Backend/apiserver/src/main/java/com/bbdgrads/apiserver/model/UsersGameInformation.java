@@ -16,18 +16,18 @@ import jakarta.persistence.ManyToOne;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "lobbies")
-public class UserGameInformation {
+@Table(name = "UsersGameInformation")
+public class UsersGameInformation {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int Id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "lobby_id", nullable = false)
+    @JoinColumn(name = "lobbyId", nullable = false)
     private Lobby lobby;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "userId", nullable = false)
     private User user;
 
     @Column(nullable = false)
@@ -41,5 +41,10 @@ public class UserGameInformation {
 
     @Column(nullable = false)
     private int health = 100;
+
+    public void ifPresent(Object object) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'ifPresent'");
+    }
 
 }

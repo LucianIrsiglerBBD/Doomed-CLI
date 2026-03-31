@@ -1,6 +1,5 @@
 package com.bbdgrads.apiserver.model;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "lobbies")
+@Table(name = "Lobbies")
 public class Lobby {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -31,12 +30,12 @@ public class Lobby {
     private boolean isStarted = false;
     
     @ManyToOne(optional = false)
-    @JoinColumn(name = "host_user_id", nullable = false)
+    @JoinColumn(name = "hostUserId", nullable = false)
     private User hostUser;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "map_id", nullable = false)
-    private Map map;
+    @JoinColumn(name = "mapId", nullable = false)
+    private GameMap map;
 
     @Column(nullable = true)
     private LocalDateTime startTime;

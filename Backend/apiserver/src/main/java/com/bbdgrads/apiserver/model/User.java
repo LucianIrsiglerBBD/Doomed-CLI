@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Table(name= "users")
+@Table(name= "Users")
 public class User
 {
     @Id
@@ -34,8 +34,12 @@ public class User
     private String passwordHash;
    
     @OneToOne
-    @JoinColumn(name = "lobby_id", unique = true)
+    @JoinColumn(name = "lobbyId", unique = true)
     private Lobby lobby;
+
+    @OneToOne
+    @JoinColumn(name = "weaponId", unique = true)
+    private  Weapon weapon;
 
      @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
