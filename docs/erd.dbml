@@ -1,0 +1,60 @@
+Table Users {
+  id int [pk]
+  name varchar [unique, not null]
+  email text [unique, not null]
+  lobby_id int [ref: > Lobbies.id, unique]
+  created_at TIMESTAMP [default: "CURRENT_TIMESTAMP"]
+}
+
+Table Maps {
+  id int [pk]
+  name varchar [unique, not null]
+  data varchar [not null]
+  created_at TIMESTAMP [default: "CURRENT_TIMESTAMP"]
+}
+
+Table Lobbies {
+  id int [pk]
+  map_id int [not null]
+  host_user_id int [not null]
+  code varchar [unique, not null]
+  is_started boolean [not null, default:0]
+  start_time TIMESTAMP [not null]
+  end_time TIMESTAMP [not null]
+  created_at TIMESTAMP [default: "CURRENT_TIMESTAMP"]
+}
+
+Table UsersGameInformation {
+  id int [pk]
+  lobby_id int [not null]
+  user_id int [not null]
+  speed int [not null]
+  health int [not null,default:100]
+  created_at TIMESTAMP [default: "CURRENT_TIMESTAMP"]
+  x int [not null]
+  y int [not null]
+}
+
+Table Weapons {
+  id int [pk]
+  name text [unique, not null]
+  damage int [not null]
+  firerate int [not null]
+  data text [not null,unique]
+}
+
+Ref: UsersGameInformation.user_id > Users.id
+Ref: UsersGameInformation.lobby_id > Lobbies.id
+
+Ref: Lobbies.map_id > Maps.id
+Ref: Lobbies.host_user_id > Users.id
+
+
+Table cli_tokens{
+  token text [pk]
+  user_id int [not null]
+  created_at TIMESTAMP [not null]
+  expires_at TIMESTAMP [not null]
+}
+
+Ref : cli_tokens.user_id - Users.id

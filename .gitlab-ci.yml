@@ -1,0 +1,62 @@
+terraform:
+  stage: deploy
+  when: manual
+  tags:
+    - docker
+  image:
+    name: hashicorp/terraform:1.14.8
+    entrypoint: [""]
+  
+  variables:
+    TF_ROOT: ${CI_PROJECT_DIR}/terraform
+    TF_STATE_NAME: default
+    TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}
+
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - ${TF_ROOT}/.terraform
+  
+  before_script:
+    - cd ${TF_ROOT}
+    - terraform init
+       
+  script:
+    - echo "Running validate"
+    - terraform validate
+
+    - echo "Running plan"
+    - terraform plan -out=tfplan
+
+    - echo "Applying plan"
+    - terraform apply "tfplan"
+  artifacts:
+    paths:
+      - ${TF_ROOT}/tfplan
+  only:
+    refs:
+      - main
+    changes:
+      - "**/*.tf"
+
+flyway-migrate:
+  stage: deploy
+  when: manual
+  tags:
+    - docker
+  image:
+    name: redgate/flyway:latest
+    entrypoint: [""]
+  variables:
+    FLYWAY_URL: "jdbc:sqlserver://${DB_HOST}:${DB_PORT};databaseName=${DB_NAME};encrypt=true;trustServerCertificate=true"
+    FLYWAY_USER: "${DB_USER}"
+    FLYWAY_PASSWORD: "${DB_PASSWORD}"
+    FLYWAY_LOCATIONS: "filesystem:sql/migrations, filesystem:sql/programmability, filesystem:sql/data"
+  script:
+    - flyway info
+    - flyway migrate
+  only:
+    refs:
+      - main
+    changes:
+      - sql/**/*

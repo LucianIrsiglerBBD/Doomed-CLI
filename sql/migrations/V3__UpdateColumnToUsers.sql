@@ -1,0 +1,5 @@
+ALTER TABLE "Users"
+ADD COLUMN email TEXT UNIQUE NOT NULL;
+
+ALTER TABLE "Users"
+DROP COLUMN password_hash;

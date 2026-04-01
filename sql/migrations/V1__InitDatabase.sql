@@ -1,0 +1,53 @@
+CREATE TABLE "Maps" (
+    "id" SERIAL PRIMARY KEY,
+    "name" VARCHAR UNIQUE NOT NULL,
+    "data" VARCHAR NOT NULL,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE "Lobbies" (
+    "id" SERIAL PRIMARY KEY,
+    "map_id" INT NOT NULL,
+    "host_user_id" INT NOT NULL,
+    "code" VARCHAR UNIQUE NOT NULL,
+    "is_started" BOOLEAN NOT NULL DEFAULT FALSE,
+    "start_time" TIMESTAMP NOT NULL,
+    "end_time" TIMESTAMP NOT NULL,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE "Users" (
+    "id" SERIAL PRIMARY KEY,
+    "name" VARCHAR UNIQUE NOT NULL,
+    "email" VARCHAR NOT NULL,
+    "lobby_id" INT UNIQUE,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE "UsersGameInformation" (
+    "id" SERIAL PRIMARY KEY,
+    "lobby_id" INT NOT NULL,
+    "user_id" INT NOT NULL,
+    "speed" INT NOT NULL,
+    "health" INT NOT NULL DEFAULT 100,
+    "x" INT NOT NULL,
+    "y" INT NOT NULL
+);
+CREATE TABLE "Weapons" (
+    "id" SERIAL PRIMARY KEY,
+    "name" TEXT UNIQUE NOT NULL,
+    "damage" INT NOT NULL,
+    "firerate" INT NOT NULL,
+    "data" TEXT UNIQUE NOT NULL
+);
+ALTER TABLE "Users"
+ADD FOREIGN KEY ("lobby_id") REFERENCES "Lobbies" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "UsersGameInformation"
+ADD FOREIGN KEY ("user_id") REFERENCES "Users" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "UsersGameInformation"
+ADD FOREIGN KEY ("lobby_id") REFERENCES "Lobbies" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "Lobbies"
+ADD FOREIGN KEY ("map_id") REFERENCES "Maps" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "Lobbies"
+ADD FOREIGN KEY ("host_user_id") REFERENCES "Users" ("id") DEFERRABLE INITIALLY IMMEDIATE;
