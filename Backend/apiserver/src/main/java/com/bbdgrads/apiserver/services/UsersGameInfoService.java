@@ -1,6 +1,7 @@
 package com.bbdgrads.apiserver.services;
 
 import org.springframework.stereotype.Service;
+
 import com.bbdgrads.apiserver.errors.LobbyNotFoundException;
 import com.bbdgrads.apiserver.errors.UserNotFoundException;
 import com.bbdgrads.apiserver.errors.UsersGameInformationNotFoundException;
@@ -11,6 +12,7 @@ import com.bbdgrads.apiserver.model.UsersGameInformation;
 import com.bbdgrads.apiserver.repository.LobbyRepository;
 import com.bbdgrads.apiserver.repository.UserRepository;
 import com.bbdgrads.apiserver.repository.UsersGameInformationRepository;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -20,7 +22,6 @@ public class UsersGameInfoService {
     private final UsersGameInformationRepository userGameInfoRepository;
     private final UserRepository userRepository;
     private final LobbyRepository lobbyRepository;
-    private final UserService userService; 
 
     public static void validatePosition(Lobby lobby, int x, int y) {
         if (x < 0 || y < 0) {
@@ -76,9 +77,6 @@ public class UsersGameInfoService {
         info.setX(x);
         info.setY(y);
 
-        if (health == 0) {
-            userService.leaveLobby(userId); 
-        }
 
         return userGameInfoRepository.save(info);
     }
