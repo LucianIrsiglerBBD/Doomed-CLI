@@ -51,8 +51,12 @@ public class UserController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
-        
-        return ResponseEntity.ok(Map.of("username", user.getName()));
+
+        Integer lobbyId = user.getLobby() != null ? user.getLobby().getId() : null;
+        return ResponseEntity.ok(Map.of(
+                "id", user.getId(),
+                "username", user.getName(),
+                "lobbyId", lobbyId != null ? lobbyId : -1));
     }
 
     @PatchMapping("/")

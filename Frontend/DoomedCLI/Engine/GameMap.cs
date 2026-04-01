@@ -30,26 +30,36 @@ class GameMap
     {
         var path = FindMapPath(mapFile);
         var lines = File.Exists(path) ? File.ReadAllLines(path) : Array.Empty<string>();
+        (_tiles, Width, Height) = BuildTiles(lines);
+    }
 
+    public static GameMap FromString(string data)
+    {
+        var lines = data.Split('\n').Select(l => l.TrimEnd('\r')).ToArray();
+        return new GameMap(lines);
+    }
+
+    private GameMap(string[] lines)
+    {
+        (_tiles, Width, Height) = BuildTiles(lines);
+    }
+
+    private static (char[][] tiles, int width, int height) BuildTiles(string[] lines)
+    {
         if (lines.Length == 0)
-        {
-            _tiles = new[] { new[] { ' ' } };
-            Width = 1;
-            Height = 1;
-            return;
-        }
+            return (new[] { new[] { ' ' } }, 1, 1);
 
-        Width = lines.Max(line => line.Length);
-        Height = lines.Length;
-
-        _tiles = new char[Height][];
-        for (int row = 0; row < Height; row++)
+        int width = lines.Max(line => line.Length);
+        int height = lines.Length;
+        var tiles = new char[height][];
+        for (int row = 0; row < height; row++)
         {
             var line = lines[row];
-            _tiles[row] = new char[Width];
-            for (int col = 0; col < Width; col++)
-                _tiles[row][col] = col < line.Length ? line[col] : ' ';
+            tiles[row] = new char[width];
+            for (int col = 0; col < width; col++)
+                tiles[row][col] = col < line.Length ? line[col] : ' ';
         }
+        return (tiles, width, height);
     }
 
     private static string FindMapPath(string mapFile)

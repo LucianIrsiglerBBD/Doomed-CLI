@@ -10,6 +10,9 @@ app.Configure(config =>
     config.AddCommand<StatusCommand>("status");
     config.AddCommand<UpdateUsernameCommand>("username");
     config.AddCommand<CreateLobbyCommand>("createlobby");
+    config.AddCommand<JoinLobbyCommand>("joinlobby");
+    config.AddCommand<StartGameCommand>("startgame");
+    config.AddCommand<TestGameCommand>("testgame");
 });
 
 while (true)
