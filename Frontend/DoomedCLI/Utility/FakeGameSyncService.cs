@@ -51,21 +51,20 @@ internal sealed class FakeGameSyncService : IGameSyncService
     private readonly Random _rng = new();
     private int _tickCount;
 
+    private const int BotCount = 40;
+
     public FakeGameSyncService(string selfUsername, GameMap map, int startX, int startY)
     {
         _selfUsername = selfUsername;
         _map = map;
 
         var rng = new Random();
-        // Spawn each bot at a valid map position near the player start
-        map.TryFindSpawnPosition(5, 3, rng, out int ax, out int ay);
-        map.TryFindSpawnPosition(5, 3, rng, out int bx, out int by);
-
-        _bots =
-        [
-            new BotPlayer("Bot_Alpha", ax, ay, rng),
-            new BotPlayer("Bot_Beta",  bx, by, rng),
-        ];
+        _bots = new BotPlayer[BotCount];
+        for (int i = 0; i < BotCount; i++)
+        {
+            map.TryFindSpawnPosition(5, 3, rng, out int bx, out int by);
+            _bots[i] = new BotPlayer($"Bot_{i}", bx, by, rng);
+        }
     }
 
     public Task PostStateAsync(int x, int y, int health, CancellationToken ct = default)

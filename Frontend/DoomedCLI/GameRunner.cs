@@ -17,7 +17,7 @@ static class GameRunner
     // Called from TestGameCommand — no auth, no backend, two wandering bots.
     public static void RunTest(string username = "TestPlayer")
     {
-        var map = new GameMap("test.txt");
+        var map = new GameMap("generated.txt");
         var rng = new Random();
         map.TryFindSpawnPosition(5, 3, rng, out int sx, out int sy);
         var sync = new FakeGameSyncService(username, map, sx, sy);
@@ -48,7 +48,7 @@ static class GameRunner
 
         // In networked mode enemies are populated from the server; in local mode spawn dummies.
         var enemies = sync is null
-            ? EnemyModel.SpawnGroup(5, map, rng)
+            ? EnemyModel.SpawnGroup(40, map, rng)
             : new List<EnemyModel>();
 
         var enemyHitboxes = new List<Hitbox>(8);

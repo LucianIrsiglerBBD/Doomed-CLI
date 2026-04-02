@@ -77,7 +77,7 @@ internal class StartGameCommand : AsyncCommand<StartGameCommand.Settings>
 
             var mapData = lobby.Map.Data;
             var map = string.IsNullOrWhiteSpace(mapData)
-                ? new GameMap("test.txt")
+                ? new GameMap("generated.txt")
                 : GameMap.FromString(mapData);
 
             var hostIp = Environment.GetEnvironmentVariable("HOST_IP") ?? string.Empty;
